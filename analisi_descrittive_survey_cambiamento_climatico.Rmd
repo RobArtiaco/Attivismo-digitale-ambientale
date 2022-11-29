@@ -1,0 +1,309 @@
+---
+title: "ANALISI DESCRITTIVA"
+author: "Nico"
+date: "2022-11-23"
+output: html_document
+---
+
+```{r}
+library(rio)
+library(tidyverse)
+library(skimr)
+library(dplyr)
+library(ggplot2)
+library(moments)
+library(scales)
+```
+
+
+```{r}
+### Statistsche descrittive e ricodificazione della variabile età
+
+summary(attivismo_new1$età)
+attivismo_new1 %>% summarise(mean = mean(età, na.rm = T),
+                  
+                  mediana = median(età, na.rm = T),
+                  sd = sd(età, na.rm = T),
+                  curtosi = kurtosis(età, na.rm = T), asimmetria = skewness(età, na.rm = T))
+#sd = standard deviation
+
+#curtosi: studia la "coda" di una distribuzione e serve a capire quante volte compaiono outliers, 
+# nel nostro caso la curtosi ha ub valore di 1.5, il che significa che c'è una bassa frequenza di outiers
+attivismo_new1 %>%
+  ggplot(aes(x=età)) + 
+#  geom_bar() +
+  stat_density(geom = "line", alpha = 1, colour = "cornflowerblue")
+# asimmetria:
+```
+Il campione presenta un'età media di circa 39 anni, il primo quartile si concentra tra i 14 e i 24 anni (intervallo di 10 anni), il secondo quartile tra i 25 e i 35 anni (intervallo di 10 anni), il terzo quartile tra i 36 e i 56 anni (intervallo di 20 anni) e il quarto quartile tra i 57 e i 76 anni (intervallo di 19 anni). Il campionamento per autoselezione ha comportato che ci sia una certa quantità di rispondenti di età compresa tra i 56 e i 65 anni, circa il 20% del campione.
+```{r}
+attivismo_new3 %>%
+  group_by(eta_classe_ric) %>%
+  summarize(n=n()) %>%
+  summarise(fascia_di_età = eta_classe_ric , n, '%' = round(n*100/sum(n),0))
+```
+Il 28% dei rispondenti ha un'età compresa tra i 18 e i 24 anni
+il 22% dei rispondenti ha un'età compresa tra i 25 e i 35 anni
+il 9% dei rispondenti ha un'età compresa tra i 36 e i 45 anni
+il 13% dei rispondenti ha un'età compresa tra i 46 e i 55 anni
+il 27% dei rispondenti ha un'età superiore ai 55 anni
+```{r}
+attivismo_new3 %>% 
+  filter(!(is.na(m_area))) %>%
+  group_by(m_area, social_influenza_politiche) %>%
+  ggplot(aes(x= m_area, y = social_influenza_politiche)) + geom_boxplot()
+```
+Il campione ha assegnato un valore pari a ..... all'affermazione "i social influenzano le scelte politiche". Ciò significa che i rispondenti concordano con l'affermazione. Tra le opinioni rilevate c'è generalmente una scarsa variabilità, fatta eccezione per l'opinione "i social influenzano la politica":
+notiamo infatti che al nord valori estremi molto bassi non compaiono (0 e 2) e la distribuzione è più concentrata verso punteggi più alti (il 75% del campione ha assegnato un valore tra 6 e 10, rispetto a Centro e sud dove il 75% del campione ha assegnato valori tra 5 e 10). Il 50% del campione del nord ha assegnato valori tra 7 e 10 mentre al sud i valori si concentrano tra 8 e 10. 
+
+```{r}
+attivismo_new3%>% 
+  group_by(m_area)%>%
+  summarise(n = n())
+
+```
+
+
+```{r}
+attivismo_new3 %>% 
+  filter(!(is.na(m_area))) %>%
+  ggplot(aes(x=m_area, y=età)) +geom_boxplot()
+attivismo_new3%>% 
+  filter(!(is.na(m_area))) %>%
+  group_by(m_area)%>%
+  summarise(mean = round(mean(età)))
+
+
+```
+Osservando l'età dei rispondenti per macro-area, notiamo che i rispondenti di centro e nord hanno una distribuzione più o meno simile e un'età media di 43-44 anni, i rispondenti di sud hanno un'età media di 33 anni. Le differenze della distribuzione di età sono riconducibili alle diverse strategie di campionamento adottate, poiché la maggior parte dei rispondenti di sud sono stati raggiunti tramite un campionamento a valanga partendo dalla condivisione della survey sui profili personali dei ricercatori.
+```{r}
+napoli = attivismo_new3 %>%
+  filter(CAP >= 80010 & CAP <=  80081 |
+         CAP >= 80121 & CAP <= 80147)
+```
+```{r}
+###Socioanagrafiche
+
+  attivismo_new3 %>% 
+  filter(!(is.na(eta_classe_ric))) %>%
+  ggplot(aes(x=eta_classe_ric, y=ore_social_ric, fill = eta_classe_ric)) + 
+  geom_boxplot() +
+  ylab("ore passate sui social") +
+  xlab("classi di età")
+
+```
+RICORDATI DI MODIFICARE NOME LEGENDA
+
+Le ore passate sui social diminuiscono con l'avanzare dell'età: i rispondenti tra i 18 e i 24 anni passano una media tra 2 e 3 ore sui social, ma le risposte sono equidistribuite su tutte le modalità, i rispondenti tra i 25 e i 35 anni passano in media 1 o 2 ore sui social. la variabilità di ore passate sui social varia molto in base alla classe di età. Mentre la prima classe è distribuita su tutte le modalità di risposta, per le altre la variabilità diminuisce e si concentra sulle modalità "inferiori", e le modalità superiori rappresentano degli outlier.
+```{r}
+attivismo_new3 %>% 
+  group_by(titolo_studio) %>%
+  mutate(titolo_studio = factor(titolo_studio, levels = c("Specializzazione post-laurea",
+                                                          "Laurea magistrale",
+                                                          "Laurea triennale",
+                                                          "Diploma", 
+                                                          "Licenza media",
+                                                          "licenza elementare",
+                                                          "Nessun titolo"), ordered = TRUE)) %>%
+  summarise(n = n()) %>%
+  summarise(titolo_studio, n, perc= n*100/sum(n), cum_per = cumsum(perc)) 
+  #ggplot(aes(x=titolo_studio, y=perc)) +geom_col() + theme(axis.text.x = element_text(angle = 35,hjust = 1))
+```
+
+
+Il 56% del campione ha almeno una laurea triennale. Quasi un rispondente su 10 ha una specializzazione post-laurea. Il fatto che ci sia stata un'autoselezione di individui con maggiore livello di istruzione può essere giustificato dal maggiore livello di sensibilità mostrato da tali individui.
+
+
+
+```{r}
+attivismo_new3 %>%
+  group_by(m_area,titolo_studio) %>%
+  mutate(titolo_studio = factor(titolo_studio, levels = c("Specializzazione post-laurea",
+                                                          "Laurea magistrale",
+                                                          "Laurea triennale",
+                                                          "Diploma", 
+                                                          "Licenza media",
+                                                          "licenza elementare",
+                                                          "Nessun titolo"), ordered = TRUE)) %>%
+  summarise(n = n()) %>%
+  mutate(perc = n/sum(n)*100)%>%
+  filter(!is.na(titolo_studio), !is.na(m_area)) %>%
+  ggplot(aes(x = titolo_studio, y=perc , fill = m_area)) +  
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 15,hjust = 1))
+
+
+```
+Per il sud abbiamo una tendenza "scalare" per quanto riguarda il livello di istruzione mentre per il centro e il nord abbiamo tendenze diverse
+
+Circa il 41 % dei rispondenti risulta occupato e circa il 25% è uno studente, il 10% sono studenti lavoratori e il 9% è pensionato
+
+
+```{r}
+attivismo_new3 %>%
+  group_by(reddito) %>%
+  summarise(n = n()) %>%
+  mutate(perc = n*100/sum(n))
+```
+Il 22% dei rispondenti ha preferito non rispondere sul reddito, il 22% dei rispondenti dichiara un reddito tra i 20.000 e i 30.000 euro, il 19% dichiara un reddito tra i 30.000 e i 50.000 euro, il 10%
+
+
+```{r}
+                                           
+attivismo_new3 %>%
+  filter(!(is.na(m_area))) %>%
+  group_by(orientamento_politico) %>%
+  summarise(n = n()) %>%
+  mutate(n= round(n*100/sum(n),0)) %>%
+  ggplot(aes(x="", y=n, fill=orientamento_politico)) +
+  geom_col(color="black")+
+  coord_polar("y", start=0) +
+  theme_void()+geom_text(aes(x=1.6, label = paste0(n, "%")), position = position_stack(vjust=0.7)) +
+  labs(x = NULL, y = NULL, fill = NULL) + 
+  scale_fill_manual(values = c("#B23AEE",
+                               "#CDC8B1","dodgerblue2", "#3C8D53", "#EE2C2C"))
+
+```
+```{r}
+attivismo_new3 %>%
+  filter(m_area == "Nord") %>%
+  filter(!(is.na(m_area))) %>%
+  group_by(orientamento_politico) %>%
+  summarise(n = n()) %>%
+  mutate(n, perc = round(n*100/sum(n),0))
+attivismo_new3 %>%
+  filter(m_area == "Centro") %>%
+  filter(!(is.na(m_area))) %>%
+  group_by(orientamento_politico) %>%
+  summarise(n = n()) %>%
+  mutate(n, perc = round(n*100/sum(n),0))
+attivismo_new3 %>%
+  filter(m_area == "sud_isole") %>%
+  filter(!(is.na(m_area))) %>%
+  group_by(orientamento_politico) %>%
+  summarise(n = n()) %>%
+  mutate(n, perc = round(n*100/sum(n),0))
+```
+```{r}
+attivismo_new3 %>%
+  filter(!(is.na(m_area)))%>%
+  group_by(orientamento_politico, m_area)%>%
+  summarise(n = n()) 
+```
+L'80% di chi ha risposto "destra" è a Nord
+
+
+il 44% dei rispondenti che non ha dichiarato il reddito non si è collocato politicamente, questa correlazione può essere spiegata o con il fatto che chi ha un'orientamento politico di destra tende a nasconderlo, oppure i rispondenti non hanno voluto fornire informazioni che ritenessero sensibili
+
+```{r}
+attivismo_new3 %>%
+  group_by(orientamento_politico, reddito) %>%
+  summarise(n = n()) %>%
+  mutate(perc = n/sum(n)*100)%>%
+  ggplot(aes(x = orientamento_politico, y=perc, fill = reddito)) +  
+  geom_col(position = "dodge")+ 
+  theme(axis.text.x = element_text(angle = 15,hjust = 1))
+```
+
+```{r}
+  ### tabelle di contingenza
+library(catspec)
+ctab(as.factor(attivismo_new3$problematica_o), as.factor(attivismo_new3$m_area), style="l",type=c("n","c"), addmargins = T)
+
+attivismo_new3 %>%
+  group_by(problematica1) %>%
+  summarise(n = n()) %>%
+  mutate(perc = round(n*100/sum(n),2)) %>%
+  ggplot(aes(x = problematica1, y=perc)) +  
+  geom_col()+ 
+  theme(axis.text.x = element_text(angle = 30,hjust = 0.8))
+
+nord = attivismo_new3 %>%
+  filter(m_area == "Nord") %>%
+  filter(!is.na(problematica_o)) %>%
+  group_by(problematica_o) %>%
+  summarise(n = n())  %>%
+  mutate(perc = round(n*100/sum(n),2)) 
+nord
+nord %>% 
+  ggplot(aes(x = perc, y=fct_rev(problematica_o))) +  
+  geom_col()+ 
+  theme(axis.text.x = element_text(angle = 30,hjust = 0.8))
+
+sud = attivismo_new3 %>%
+  filter(m_area == "sud_isole") %>%
+  filter(!is.na(problematica_o)) %>%
+  group_by(problematica_o) %>%
+  summarise(n = n()) %>%
+  mutate(perc = round(n*100/sum(n),2)) 
+sud
+sud %>%
+  ggplot(aes(x = perc, y=fct_rev(problematica_o))) +  
+  geom_col()+ 
+  theme(axis.text.x = element_text(angle = 30,hjust = 0.8))
+
+centro = attivismo_new3 %>%
+  filter(m_area == "Centro") %>%
+  filter(!is.na(problematica_o)) %>%
+  group_by(problematica_o) %>% 
+  summarise(n = n()) %>%
+  mutate(perc = round(n*100/sum(n),2)) 
+centro
+centro %>%
+  ggplot(aes(x = perc, y=fct_rev(problematica_o))) +  
+  geom_col()+ 
+  theme(axis.text.x = element_text(angle = 30,hjust = 0.8))
+
+  
+
+```
+Cose da fare: 
+1. lasciare solo etichette asse y solo al primo istogramma e mantenere le freq percentuali invariate per ogni istogramma
+
+Dati rilevanti:
+per rilevare le tematiche più interessate dai rispondenti la domanda chiedeva di apporre un massimo di due scelte. La tematica più interessata dal campione è risultata il cambiamento climatico, infatti circa il 75% dei rispondenti l'ha indicata come prima scelta. Da un lato, il dato è interessante perché c'è una massiccia concentrazione di interesse su una sola tematica (cambiamento climatico), d'altra parte questo risultato non consente di analizzare l'interesse delle altre tematiche prese in considerazione. Pertanto, abbiamo deciso di sostituire laddove il rispondente ha indicato Cambiamento climatico, la seconda tematica di suo interesse, per restituire una distribuzione più eterogenea delle tematiche. Da questa manipolazione, possiamo affermare che:
+- la seconda tematica di maggior interesse per il campione sono le abitudini di consumo. Da un punto di vista geografico questa tematica è stata la più scelta a Nord e a Sud (rispettivamente circa il 23% e il 20% delle risposte per macro area), al centro le abitudini di consumo hanno comunque raggiunto un risultato importante (circa il 21% delle risposte per macro area) ma è stata deforestazione (con circa il 22% delle risposte per macro area) ad essere stata la tematica più scelta. Questo dato inerente al centro risulta particolarmente interessante se consideriamo che tale area geografica presenta la maggior parte dei parchi in Italia (n. 13). In particolare, questo dato potrebbe essere stato influenzato dal fatto che, al momento della somministrazione (20 Giugno), è avvenuto un incendio nel parco nazionale dell'Abruzzo, del Lazio e del Molise. Questo risultato lascia immaginare che ci sia una certa consapevolezza sul peso che le abitudini personali comportano per l'ambiente. 
+Infine il fatto che ci sia stata una sovrabbondanza di persone che hanno indicato cambiamento climatico come tematica principale richiede un'ulteriore riflessione: possiamo ipotizzare che il cambiamento climatico si comporti come tematica ombrello per le altre presenti nelle modalità di risposta (eg. abitudini di consumo, inquinamento aria, risorse naturali, deforestazione etc...).
+
+```{r}
+attivismo_new3 %>%
+  group_by(m_area,condizione_lavoro) %>%
+  summarise(n = n()) %>%
+  mutate(perc = n/sum(n)*100)%>%
+  filter(!is.na(condizione_lavoro), !is.na(m_area)) %>%
+  ggplot(aes(x = condizione_lavoro, y=perc , fill = m_area)) +  
+  geom_col(position = "dodge")+ 
+  theme(axis.text.x = element_text(angle = 15,hjust = 1))
+
+attivismo_new3 %>%
+  group_by(condizione_lavoro) %>%
+  summarise(n = n()) %>%
+  mutate(perc = n/sum(n)*100)%>%
+  filter(!is.na(condizione_lavoro)) %>%
+  ggplot(aes(x = condizione_lavoro, y=perc)) +  
+  geom_col(position = "dodge")+ 
+  theme(axis.text.x = element_text(angle = 15,hjust = 1))
+
+```
+
+
+
+```{r}
+  library("dplyr")
+  library("purrr")
+  
+  attivismo_new3 %>%
+    filter(m_area == "Nord") %>%
+    select(fruizione_contenuti,seguito_pagine,info_proteste,iscrizione_gruppi,hashtags,condiviso_contenuti,firma_petizioni,denuncia_abusi, compra_prodotti,creazione_contenuti,donazioni) %>%
+    map_dbl(sum)
+  attivismo_new3 %>%
+    filter(m_area == "Centro") %>%
+    select(fruizione_contenuti,seguito_pagine,info_proteste,iscrizione_gruppi,hashtags,condiviso_contenuti,firma_petizioni,denuncia_abusi, compra_prodotti,creazione_contenuti,donazioni) %>%
+    map_dbl(sum)
+  attivismo_new3 %>%
+    filter(m_area == "sud_isole") %>%
+    select(fruizione_contenuti,seguito_pagine,info_proteste,iscrizione_gruppi,hashtags,condiviso_contenuti,firma_petizioni,denuncia_abusi, compra_prodotti,creazione_contenuti,donazioni) %>%
+    map_dbl(sum)
+```
+
+
