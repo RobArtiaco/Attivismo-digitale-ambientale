@@ -23,6 +23,7 @@ Quindi con il presente lavoro, basato su una survey, si vuole superare questo li
 prospettiva globale del fenomeno. 
 
 Linguaggi utilizzati: R
+
 Software utilizzati: RStudio, Nvivo
 
 Keywords – attivismo digitale, attivismo ambientale, cambiamento climatico, social network
