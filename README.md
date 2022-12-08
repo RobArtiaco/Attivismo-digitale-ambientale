@@ -1,9 +1,3 @@
-- 👋 Hi, I’m @RobArtiaco
-- 👀 I’m interested in data science and social research
-- 🌱 I’m currently learning R, Python, SQL and API's
-- 💞️ I’m looking to collaborate on projects regarding data analytics etc
-- 📫 You can reach me at the following email: robertoartiaco@gmail.com
-
 Obiettivo: L’obiettivo di questa ricerca è esplorare il fenomeno dell’attivismo ambientale digitale partendo 
 dall’ipotesi che il tipo di partecipazione e l’interesse verso specifiche tematiche ambientali sia condizionato dal 
 risiedere in un particolare territorio (Stedman, 2002). In particolare, il lavoro si concentra sull’Italia, suddivisa per 
