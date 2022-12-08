@@ -22,6 +22,9 @@ ricerche risultano essere circoscritte a casi studio specifici, basati spesso su
 Quindi con il presente lavoro, basato su una survey, si vuole superare questo limite per arrivare ad avere una 
 prospettiva globale del fenomeno. 
 
+Linguaggi utilizzati: R
+Software utilizzati: RStudio, Nvivo
+
 Keywords – attivismo digitale, attivismo ambientale, cambiamento climatico, social network
 
 <!---
